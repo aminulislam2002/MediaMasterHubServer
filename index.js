@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { channelId, videoId } = require("@gonetone/get-youtube-id-by-url");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -22,9 +23,32 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    // Connect to the "mediaMasterHub" database and access its "youtubeChannelAuthenticationID" collection
+    const database = client.db("mediaMasterHub");
+    const youtubeChannelAuthenticationID = database.collection("youtubeChannelAuthenticationID");
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
+
+    app.post("/youtubeChannelLogin", async (req, res) => {
+      const youtubeChannelLink = req.body.youtubeChannelLink;
+      // get the youtube channel id from youtube channel link
+      const youtubeChannelID = await channelId(youtubeChannelLink);
+
+      // check if the youtube channel id already exists in the database
+      const existingRecord = await youtubeChannelAuthenticationID.findOne({ youtubeChannelID });
+
+      if (existingRecord) {
+        // If the record already exists, send a response indicating that
+        res.json({ success: true, youtubeChannelID });
+      } else {
+        // If the record does not exist, insert it into the database
+        const result = await youtubeChannelAuthenticationID.insertOne({ youtubeChannelID });
+        res.json({ success: true, youtubeChannelID });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
