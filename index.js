@@ -31,6 +31,11 @@ async function run() {
     await client.connect();
     // Send a ping to confirm a successful connection
 
+    app.get("/youtubeChannelLoginID", async (req, res) => {
+      const result = await youtubeChannelAuthenticationID.find().toArray();
+      res.send(result);
+    });
+
     app.post("/youtubeChannelLogin", async (req, res) => {
       const youtubeChannelLink = req.body.youtubeChannelLink;
       // get the youtube channel id from youtube channel link
