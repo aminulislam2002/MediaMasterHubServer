@@ -43,11 +43,17 @@ async function run() {
       const youtubeChannelID = await channelId(youtubeChannelLink);
 
       // check if the youtube channel id already exists in the database
-      const existingRecord = await youtubeChannelAuthenticationID.findOne({ youtubeChannelID });
+      const existingRecordWithChannelId = await youtubeChannelAuthenticationID.findOne({ youtubeChannelID });
 
-      if (existingRecord) {
+      // Check if the email already has a record in the database
+      const existingRecordWithUserEmail = await youtubeChannelAuthenticationID.findOne({ userEmail });
+
+      if (existingRecordWithChannelId) {
         // If the record already exists, send a response indicating that
         res.json({ success: true, youtubeChannelID });
+      } else if (existingRecordWithUserEmail) {
+        // If the record already exists, send a response indicating that
+        res.json({ success: false });
       } else {
         // If the record does not exist, insert it into the database
         const result = await youtubeChannelAuthenticationID.insertOne({ youtubeChannelID, userEmail });
