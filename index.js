@@ -26,6 +26,7 @@ async function run() {
     // Connect to the "mediaMasterHub" database and access its "youtubeChannelAuthenticationID" collection
     const database = client.db("mediaMasterHub");
     const youtubeChannelAuthenticationID = database.collection("youtubeChannelAuthenticationID");
+    const usersCollection = database.collection("usersCollection");
 
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
@@ -52,6 +53,17 @@ async function run() {
         const result = await youtubeChannelAuthenticationID.insertOne({ youtubeChannelID });
         res.json({ success: true, youtubeChannelID });
       }
+    });
+
+    app.post("/authenticationUser", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists" });
+      }
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
     });
 
     await client.db("admin").command({ ping: 1 });
