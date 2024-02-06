@@ -38,7 +38,7 @@ async function run() {
     });
 
     app.post("/youtubeChannelLogin", async (req, res) => {
-      const youtubeChannelLink = req.body.youtubeChannelLink;
+      const { youtubeChannelLink, userEmail } = req.body;
       // get the youtube channel id from youtube channel link
       const youtubeChannelID = await channelId(youtubeChannelLink);
 
@@ -50,7 +50,7 @@ async function run() {
         res.json({ success: true, youtubeChannelID });
       } else {
         // If the record does not exist, insert it into the database
-        const result = await youtubeChannelAuthenticationID.insertOne({ youtubeChannelID });
+        const result = await youtubeChannelAuthenticationID.insertOne({ youtubeChannelID, userEmail });
         res.json({ success: true, youtubeChannelID });
       }
     });
